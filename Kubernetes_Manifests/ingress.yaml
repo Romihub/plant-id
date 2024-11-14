@@ -1,0 +1,23 @@
+# ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: plant-id-ingress
+  namespace: plant-id
+  annotations:
+    kubernetes.io/ingress.class: "gce"
+    networking.gke.io/managed-certificates: "plant-id-cert"    # If using managed certs networking.gke.io/managed-certificates
+    kubernetes.io/ingress.global-static-ip-name: "plant-id-ip" # If using static IP
+    networking.gke.io/v1beta1.FrontendConfig: "plant-id-https"
+spec:
+  rules:
+  - host: projectrom.co.uk  # Replace with your domain
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: plant-identifier
+            port:
+              number: 80

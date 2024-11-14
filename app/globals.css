@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+body {
+  background: linear-gradient(-45deg, #2ecc71, #27ae60, #3498db, #2980b9);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+  min-height: 100vh;
+  color: #333; /* Darker text color for better readability */
+}
+
+/* Adjust main content area for better contrast */
+main {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 1200px;
+}
+
+/* Adjust NavBar and Footer for better visibility */
+nav, footer {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+}
+
+/* Additional utility classes for better contrast */
+.bg-white {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.text-gray-600 {
+  color: rgba(75, 85, 99, 1) !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Ensure buttons and interactive elements are visible */
+.bg-green-600, .bg-blue-500 {
+  color: white;
+}
+
+/* Adjust form inputs for better visibility */
+input[type="file"], input[type="text"], textarea {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}

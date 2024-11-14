@@ -1,0 +1,21 @@
+# prom-stack-values.yaml
+grafana:
+  service:
+    type: LoadBalancer
+  # adminPassword: "your-secure-password" I passed it in cli
+
+prometheus:
+  prometheusSpec:
+    retention: 15d
+  service:
+    type: LoadBalancer
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}  # This will select all ServiceMonitors
+    serviceMonitorNamespaceSelector: {}  # This will look in all namespaces
+
+alertmanager:
+  service:
+    type: LoadBalancer
+
+# serviceMonitorSelectorNilUsesHelmValues: false

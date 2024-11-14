@@ -1,0 +1,120 @@
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: plant-identifier
+  namespace: plant-id
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plant-identifier
+  template:
+    metadata:
+      labels:
+        app: plant-identifier
+    spec:
+      containers:
+      - name: plant-identifier
+        image: gcr.io/handy-math-440909-q1/plant-identifier:latest
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 256Mi
+        env:
+        - name: GOOGLE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: plant-id-secrets
+              key: GOOGLE_API_KEY
+
+---
+# service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: plant-identifier
+  namespace: plant-id
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'  # Important for GKE ingress
+    cloud.google.com/app-protocols: '{"http":"HTTPS"}'
+    cloud.google.com/backend-config: '{"default": "plant-id-backend-config"}'
+  labels:
+    app: plant-identifier
+spec:
+  type: ClusterIP
+  ports:
+  - name: http # port name also used in ServiceMonitor
+    port: 80
+    targetPort: 3000
+  selector:
+    app: plant-identifier
+
+---
+# hpa.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: plant-identifier-hpa
+  namespace: plant-id
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: plant-identifier
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+
+---
+# managed-cert.yaml
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: plant-id-cert
+  namespace: plant-id
+spec:
+  domains:
+  - projectrom.co.uk
+
+---
+# frontend-config.yaml
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: plant-id-https
+  namespace: plant-id
+spec:
+  redirectToHttps:
+    enabled: true
+    responseCodeName: MOVED_PERMANENTLY_DEFAULT # 301 redirect
+  sslPolicy: gke-ingress-ssl-policy
+
+
+---
+# backend-config.yaml
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: plant-id-backend-config
+  namespace: plant-id
+spec:
+  healthCheck:
+    checkIntervalSec: 30
+    timeoutSec: 5
+    healthyThreshold: 1
+    unhealthyThreshold: 2
+    type: HTTP
+    requestPath: /
+    port: 3000

@@ -1,0 +1,15 @@
+# service-monitor.yaml
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: plant-id-service-monitor
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - plant-id
+  selector:
+    matchLabels:
+      app: plant-identifier  # must match your service labels
+  endpoints:
+  - port: http  # must match your service port name
